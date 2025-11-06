@@ -1,37 +1,37 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" version="28.2.9">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36" version="28.2.9">
   <diagram id="payment-service" name="Payment Service">
-    <mxGraphModel dx="1413" dy="790" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="ps_box" value="Payment Service&#xa;(Invoices, Gateway Integration)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFECEC;strokeColor=#000000;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+        <mxCell id="ps_box" value="Payment Service&#xa;(Invoices, Gateway Integration)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFECEC;strokeColor=#000000;fontSize=12;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="240" y="40" width="440" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ps_api" value="API Endpoints:&#xa;POST /payments -&gt; InitiatePayment()&#xa;GET /payments/{id} -&gt; GetPaymentStatus()&#xa;POST /payments/refund/{id} -&gt; RefundPayment()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=11;" parent="1" vertex="1">
+        <mxCell id="ps_api" value="API Endpoints:&#xa;POST /payments -&gt; InitiatePayment()&#xa;GET /payments/{id} -&gt; GetPaymentStatus()&#xa;POST /payments/refund/{id} -&gt; RefundPayment()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="240" y="140" width="440" height="110" as="geometry" />
         </mxCell>
-        <mxCell id="ps_db" value="Database (Postgres)&#xa;payments table:&#xa;- id, student_id, enrollment_id, amount, status, transaction_ref" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FFF0;strokeColor=#000000;fontSize=11;" parent="1" vertex="1">
+        <mxCell id="ps_db" value="Database (Postgres)&#xa;payments table:&#xa;- id, student_id, enrollment_id, amount, status, transaction_ref" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F7FFF0;strokeColor=#000000;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="110" y="320" width="300" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ps_gateway" value="Payment Gateway&lt;br&gt;(tokenized card handling)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF0F0;strokeColor=#000000;fontSize=11;" parent="1" vertex="1">
+        <mxCell id="ps_gateway" value="Payment Gateway&lt;br&gt;(tokenized card handling)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF0F0;strokeColor=#000000;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="500" y="320" width="300" height="80" as="geometry" />
         </mxCell>
-        <mxCell id="ps_bus" value="Event Bus (Kafka)&lt;br&gt;Consumes: RegistrationPendingPayment&lt;br&gt;Publishes: PaymentConfirmed, PaymentFailed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F7FF;strokeColor=#000000;fontSize=11;" parent="1" vertex="1">
+        <mxCell id="ps_bus" value="RabbitMQ&lt;br&gt;Consumes: RegistrationPendingPayment&lt;br&gt;Publishes: PaymentConfirmed, PaymentFailed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F0F7FF;strokeColor=#000000;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="240" y="500" width="440" height="120" as="geometry" />
         </mxCell>
-        <mxCell id="ps_notes" value="Payment Flow:&#xa;1. On RegistrationPendingPayment -&gt; create payment record (PENDING)&#xa;2. Call Payment Gateway to charge&#xa;3. On success -&gt; update status=SUCCESS, publish PaymentConfirmed&#xa;4. On failure -&gt; status=FAILED, publish PaymentFailed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8F8;strokeColor=#000000;fontSize=11;" parent="1" vertex="1">
+        <mxCell id="ps_notes" value="Payment Flow:&#xa;1. On RegistrationPendingPayment -&gt; create payment record (PENDING)&#xa;2. Call Payment Gateway to charge&#xa;3. On success -&gt; update status=SUCCESS, publish PaymentConfirmed&#xa;4. On failure -&gt; status=FAILED, publish PaymentFailed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8F8;strokeColor=#000000;fontSize=11;" vertex="1" parent="1">
           <mxGeometry x="750" y="40" width="310" height="150" as="geometry" />
         </mxCell>
-        <mxCell id="pc1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#000000;endArrow=block;" parent="1" source="ps_api" target="ps_db" edge="1">
+        <mxCell id="pc1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#000000;endArrow=block;" edge="1" parent="1" source="ps_api" target="ps_db">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="pc2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#000000;endArrow=block;" parent="1" source="ps_api" target="ps_gateway" edge="1">
+        <mxCell id="pc2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#000000;endArrow=block;" edge="1" parent="1" source="ps_api" target="ps_gateway">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="pc3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#000000;endArrow=block;" parent="1" source="ps_bus" target="ps_db" edge="1">
+        <mxCell id="pc3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#000000;endArrow=block;" edge="1" parent="1" source="ps_bus" target="ps_db">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="pc4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#000000;endArrow=block;" parent="1" source="ps_bus" target="ps_gateway" edge="1">
+        <mxCell id="pc4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;html=1;strokeColor=#000000;endArrow=block;" edge="1" parent="1" source="ps_bus" target="ps_gateway">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="460" y="450" />
