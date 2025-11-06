@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-config
+  namespace: ums
+data:
+  RABBITMQ_EXCHANGE: ums_events
+  RABBITMQ_ROUTING_KEY: payment.events
