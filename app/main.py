@@ -1,4 +1,3 @@
-# app/main.py
 from typing import List, Optional
 import os
 import time
@@ -28,7 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Startup: initialize DB and start the consumer that listens to enrollment events
+# Initialize DB and start the consumer that listens to enrollment events
 @app.on_event("startup")
 def startup():
     logger.info("Initializing DB and starting enrollment-event consumer...")
@@ -43,11 +42,11 @@ def get_db():
     finally:
         db.close()
 
-# Root and health endpoints
 @app.get("/")
 def root():
     return {"service": "Payment Service", "status": "running", "endpoints": ["/payments", "/docs", "/openapi.json"]}
 
+#Defined but not called in the deployment.yaml file to check liveness and readiness.
 @app.get("/health")
 def health():
     try:
@@ -59,7 +58,6 @@ def health():
         raise HTTPException(status_code=503, detail="Database unreachable")
     return {"status": "ok"}
 
-# Create a payment (simulate processing asynchronously)
 @app.post("/payments", response_model=schemas.PaymentOut, status_code=201)
 def initiate_payment(payment_in: schemas.PaymentCreate, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     payment = models.Payment(
@@ -111,7 +109,7 @@ def refund_payment(payment_id: int, db: Session = Depends(get_db)):
     logger.info("Refunded payment id=%s", payment_id)
     return schemas.PaymentOut.from_orm(payment)
 
-# Admin approve: mark payment SUCCESS and publish PaymentConfirmed event
+# Admin approves ==> mark payment SUCCESS and publish PaymentConfirmed event
 @app.post("/payments/{payment_id}/approve", response_model=schemas.PaymentOut)
 def approve_payment(payment_id: int, db: Session = Depends(get_db)):
     payment = db.query(models.Payment).filter(models.Payment.id == payment_id).first()
@@ -131,7 +129,6 @@ def approve_payment(payment_id: int, db: Session = Depends(get_db)):
     logger.info("Approved payment id=%s and published PaymentConfirmed", payment_id)
     return schemas.PaymentOut.from_orm(payment)
 
-# List payments with optional filters (status, student_id)
 @app.get("/payments", response_model=List[schemas.PaymentOut])
 def list_payments(status: Optional[str] = Query(None), student_id: Optional[str] = Query(None), db: Session = Depends(get_db)):
     q = db.query(models.Payment)

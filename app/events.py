@@ -1,4 +1,3 @@
-# app/events.py
 import pika
 import json
 import threading
@@ -8,9 +7,8 @@ import traceback
 from app import models, database
 from sqlalchemy.orm import Session
 
-EXCHANGE = "ums_events"  # topic exchange
+EXCHANGE = "ums_events"
 
-# ---- Publisher (used by services to publish events) ----
 def publish_event(rabbitmq_url: str, routing_key: str, event: dict):
     try:
         params = pika.URLParameters(rabbitmq_url)
@@ -24,18 +22,15 @@ def publish_event(rabbitmq_url: str, routing_key: str, event: dict):
         print("Error publishing event:", e)
         traceback.print_exc()
 
-# ---- Payment processing simulation + publisher ----
 def process_payment_and_publish(rabbitmq_url: str, payment_id: int, student_id: str, enrollment_id: int, amount: float):
     """
     Simulate contacting a payment gateway and publish PaymentConfirmed/Failed.
     Even amounts succeed in this demo; odd amounts fail.
     """
     try:
-        # simulate latency
         time.sleep(1)
         success = int(amount) % 2 == 0
 
-        # ensure DB initialized for this thread
         database.init_db(os.getenv("DATABASE_URL", "postgresql://postgres:postgres@db:5432/payment_db"))
         db = database.SessionLocal()
         try:
@@ -65,7 +60,6 @@ def process_payment_and_publish(rabbitmq_url: str, payment_id: int, student_id: 
         print("Error in process_payment_and_publish:", e)
         traceback.print_exc()
 
-# ---- Callback helper: create payment record when registration event arrives ----
 def _process_registration_event(body: dict, db: Session):
     """
     Called when Enrollment publishes RegistrationPendingPayment.
@@ -77,23 +71,19 @@ def _process_registration_event(body: dict, db: Session):
     student_id = payload.get("student_id")
     amount = payload.get("amount", 0.0)
 
-    # create a payment record in PENDING and return — do NOT start processing thread automatically
     payment = models.Payment(student_id=student_id, enrollment_id=enrollment_id, amount=amount, status="PENDING")
     db.add(payment)
     db.commit()
     db.refresh(payment)
 
     print(f"Created PENDING payment id={payment.id} for enrollment={enrollment_id} student={student_id}")
-    # no background thread started here — admin must call approve endpoint to process
 
 
-# ---- Robust consumer loop (reconnects, logs, acknowledges) ----
 def _consumer_runloop(database_url: str, rabbitmq_url: str, queue_name: str = ""):
     """
     Persistent consumer loop: connects, declares exchange & queue, binds and consumes.
     Reconnects on errors with backoff.
     """
-    # ensure DB models created
     database.init_db(database_url)
 
     while True:
@@ -104,7 +94,6 @@ def _consumer_runloop(database_url: str, rabbitmq_url: str, queue_name: str = ""
             ch = conn.channel()
             ch.exchange_declare(exchange=EXCHANGE, exchange_type="topic", durable=True)
 
-            # decide queue: named (non-exclusive) or server-named exclusive
             if queue_name:
                 q = ch.queue_declare(queue=queue_name, durable=False, exclusive=False)
                 actual_queue = queue_name
@@ -119,7 +108,6 @@ def _consumer_runloop(database_url: str, rabbitmq_url: str, queue_name: str = ""
                 try:
                     payload = json.loads(body)
                     print("Payment consumer received message:", payload)
-                    # open a session for this callback
                     db = database.SessionLocal()
                     try:
                         _process_registration_event(payload, db)
@@ -152,7 +140,6 @@ def _consumer_runloop(database_url: str, rabbitmq_url: str, queue_name: str = ""
             except Exception:
                 pass
 
-        # backoff before reconnecting
         print("Payment consumer will reconnect after backoff...")
         time.sleep(3)
 
